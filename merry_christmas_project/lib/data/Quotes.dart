@@ -1,0 +1,40 @@
+class Quotes {
+  Quotes._();
+
+  static const quotes_data = [
+    "One can never have enough socks, said Dumbledore. Another Christmas has come and gone and I didn’t get a single pair. People will insist on giving me books. ― J.K. Rowling",
+    "The main reason Santa is so jolly is because he knows where all the bad girls live. ― George Carlin",
+    "Let the children have their night of fun and laughter, let the gifts of Father Christmas delight their play. Let us grown-ups share to the full in their unstinted pleasures. ― Sir Winston Churchill",
+    "You know you’re getting old when Santa starts looking younger. ― Robert Paul",
+    "There’s nothing sadder in this world than to awake Christmas morning and not be a child. ― Erma Bombeck",
+    "From Home to home, and heart to heart, from one place to another. The warmth and joy of Christmas bring us closer to each other. ― Emily Matthews",
+    "Blessed is the season which engages the whole world in a conspiracy of love. ― Hamilton Wright Mabie",
+    "He who has no Christmas in his heart will never find Christmas under a tree. ― Sunshine Magazine",
+    "Christmas, children, is not a date. It is a state of mind. ― Mary Ellen Chase",
+    "Christmas waves a magic wand over this world, and behold, everything is softer and more beautiful. ~ Norman Vincent Peale",
+    "I wish we could put up some of the Christmas spirit in jars and open a jar of it every month. ~ Harlan Miller",
+    "God never gives someone a gift they are not capable of receiving. If he gives us the gift of Christmas, it is because we all have the ability to understand and receive it. Pope Francis",
+    "I heard the bells on Christmas Day Their old, familiar carols play, And wild and sweet The words repeat Of peace on earth, good-will to men! ~ Henry Wadsworth Longfellow",
+    "Christmas gift suggestions: to your enemy, forgiveness. To an opponent, tolerance. To a friend, your heart. To a customer, service. To all, charity. To every child, a good example. To yourself, respect. ~ Oren Arnold",
+    "My idea of Christmas, whether old-fashioned or modern, is very simple: loving others. Bob Hope",
+    "Christmas is not just a time for festivity and merry making. It is more than that. It is a time for the contemplation of eternal things. The Christmas spirit is a spirit of giving and forgiving. – J. C. Penney",
+    "I wish we could put up some of the Christmas spirit in jars and open a jar of it every month. – Harlan Miller",
+    "I love Christmas, not just because of the presents but because of all the decorations and lights and the warmth of the season. – Ashley Tisdale",
+    "I will honor Christmas in my heart, and try to keep it all the year. – Charles Dickens",
+    "Gifts of time and love are surely the basic ingredients of a truly merry Christmas. – Peg Bracken",
+    "Perhaps the best Yuletide decoration is being wreathed in smiles. ― Unknown",
+    "If there is no joyous way to give a festive gift, give love away. ― Unknown",
+    "Christmas is the gentlest, loveliest festival of the revolving year — and yet, for all that, when it speaks, its voice has strong authority. ― W. J. Cameron",
+    "I wish we could put up some of the Christmas spirits in jars and open a jar of it every month. ― Harlan Miller",
+    "Christmas is not a date. It is a state of mind. ― Mary Ellen Chase",
+    "Heap on the wood!-the wind is chill; But let it whistle as it will, We’ll keep our Christmas merry still. ― Sir Walter Scott",
+    "Christmas is joy, religious joy, an inner joy of light and peace. – Pope Francis",
+    "Christmas is most truly Christmas when we celebrate it by giving the light of love to those who need it most. – Ruth Carter Stapleton",
+    "Christmas, my child, is love in action. Every time we love, every time we give, it’s Christmas. – Dale Evans Rogers",
+    "Blessed is the season which engages the whole world in a conspiracy of love.- Hamilton Wright Mabie",
+    "Christmas gift suggestions: To your enemy, forgiveness. To an opponent, tolerance. To a friend, your heart. To a customer, service. To all, charity. To every child, a good example. To yourself, respect. ― Oren Arnold",
+    "Let no pleasure tempt thee, no profit allure thee, no persuasion move thee, to do anything which thou knowest to be evil; so shalt thou always live jollity; for a good conscience is a continual Christmas. ― Benjamin Franklin",
+    "At Christmas play and make good cheer, For Christmas comes but once a year. ― Thomas Tusser",
+    "It is Christmas in the heart that puts Christmas in the air. ― W. T. Ellis"
+  ];
+}

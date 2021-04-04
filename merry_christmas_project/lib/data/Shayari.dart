@@ -1,0 +1,36 @@
+class Shayari {
+  Shayari._();
+  static const shayari_data = [
+    "खुदा से क्या मांगू तुम्हारे वास्ते,\nसदा खुशियाँ हो तुम्हारे रास्ते,\nहंसी तुम्हारे चेहरे पर रहे कुछ इस तरह,\nखुशबू फूल का साथ निभाए जिस तरह !\nहैप्पी क्रिसमस",
+    "No Greeting Card to Give\nNo Sweet Flowers to Send\nNo Cute Graphics to Forward\nJust A LOVING HEART\nSaying “HAPPY X’MAS”",
+    "My Christmas message\nWrapped with love and happiness\nSaying thank you Mom & Dad\nFor your support the whole year through\nNow relax, you deserve the best.",
+    "इस क्रिसमस आपका जीवन क्रिसमस ट्री की तरह,\nहरा भरा और भविष्य तारों की तरह चमचमाता रहे!\nहैप्पी क्रिसमस",
+    "क्रिसमस का यह प्यारा त्यौहार जीवन में,\nलाये खुशियाँ अपार, सांता क्लॉस आये आपके द्वार,\nयह शुभकामना हमारी करें स्वीकार ,\nहैप्पी मेरी क्रिसमस ",
+    "चाँद ने अपनी चांदनी बिखेरी है,\nऔर तारों ने आसमान को सजाया है,\nलेकर तौफा अमन और प्यार का,\nदेखो स्वर्ग से कोई फ़रिश्ता आया है,\nहैप्पी मेरी क्रिसमस 2019",
+    "गुल ने गुलशन से गुलफाम भेजा है,\nसितारों ने आसमान से सलाम भेजा है\nमुबारक हो आपको क्रिसमस का यह प्यारा त्यौहार\nहमने आपको यह पैगाम भेजा है|",
+    "Another day, another month, another Christmas\nAnother winter, another smile, another year,\nMay special memories brighten your Christmas\nMay the joy of Christmas be with you forever.",
+    "Devdoot banke koi aayega,\nSaari aashayein tumhari,\nPoori karke jaayega,\nChristmas ke is shubh din par\nTohfe khushiyo ke de jayega.",
+    "A little smile, A word of cheer,\nA bit of love from someone near\nA little gift from one held dear,\nBest wishes for the coming year\nThese make a Merry Christmas.",
+    "Na card bhej raha hun,\nNa koi phool bhej raha hun\nSirf sache dil se mein aap ko\nChristmas aur nav varsh ke\nShubhkamana bhej raha hun.",
+    "क्रिसमस आया क्रिसमस आया,\nबच्चों का है मन ललचाया।\nसैंटाक्लॉज आएंगे, नए खिलौने लाएंगे।\nसैंटाक्लॉज ने दी आवाज, एनी आओ,\nपेनी आओ, जॉनी आओ, जॉन आओ,\nयीशु की ये याद का दिन है,\nबच्चों का ये प्यार का दिन है।",
+    "X’Mas is magic\nBringing families together\nSharing beats of love\nLaughter and lots of happiness\nLonging to see you at Christmas.",
+    "Baccho ka din, tohfon ka din\nSanta aayega kuch tumhe deke jayega\nBhul na jana use shukriya kehna\nYahi saadgi ishu saa sikhayega!",
+    "I wish you joy all though your holidays,\nI wish you good luck that forever stays.\nI wish you the love of family and friends,\nI wish you happy days that never ever ends.",
+    "Khuda se kya maangu tere waste\nSada khushiyo se bhare ho tere jeevan k raste\nHansi tere chehre pe rahe is tarah\nKhushboo phool ka sathh nibhati hai jis tarah.",
+    "Silent night silvery snow\nEvergreen tree bright and a glow\nChristmas is here bringing good cheer\nMay it bring for you\nGifts of love and joy too!",
+    "Sabke Dilo mein ho sabke liye Pyar,\nAanewala har din laye khusiyo ka Tyohar,\nIs ummid ka sath aao bhulke sare Gum\nChristmas me hum sab kare WEL-COME!",
+    "X’mas is love,\nX’mas is dedication,\nX’mas is happiness.\nHappy X-MAS to you\nAnd your family with a\nBunch of love and prayers.",
+    "Chand ne apni chandani bikheri hain\nAur taro ne aasma ko sajaya hain\nLekar taufa aman aur pyaar ka.\nDekho Swarg se koi farishta aaya hai",
+    "A Christmas candle is a lovely thing\nIt makes no noise at all,\nBut softly gives itself away\nWhile quite unselfish, it grows small.",
+    "Prabhu ishu ke pavitra parva\nChristmas ki aap sabhi ko badhai.\nParmeshwar k pavitra-marg ka\nAnusharan karein wo sadaiv saath hai,\nApne bando ki sir pr uska hmesha hath h",
+    "May this Christmas bring you closer to God\nMay you be able to understand the love that\nHe has for you in a more better manner.\nMay baby Jesus stay with you forever….!!",
+    "Christmas ka ye pyara sa tyohaar\nJeevan me laye khushiyan apaar\nSanta clause aayee aapke dwar\nSubhkamna hamari kare sweekar.",
+    "May baby Jesus bring you\nAnd your family lots of love.\nMay the host of angels\nFill your life with joy and bliss.\nMerry Christmas to you\nAnd all your loved ones.",
+    "Lo Aa gaya jis ka tha intezaar,\nSab mil ke bolo mere yaar,\nDecember me laya Christmas bahaar\nMubarak ho tumko Christmas mere yaar",
+    "Holds your hand when your scared.\nMakes you smile when you’re down,\nHugs you when you need comfort,\nAnd buys you gifts during CHRISTMAS!!",
+    "Aapki aankho mein saje ho jo bhi sapne\nAur dil mein chupi ho jo bhi abhilashaye\nYe Christmas ka parv unhe sach kar jaye\nAap ke liye hai humari yhi shubhkamnaye",
+    "I wish you Lovely X-mas\nI wish you Favorable ”\nI wish you Enjoyable ”\nYou shall not Lack in this X-mas\nThe Lord shall provide to you.",
+    "Christmas  aye ban kar ujaala,\nKhul jaaye aap ki kismat ka tala,\nHmesha tum pe meherban rahe upar wala,\nBas itni c dua krta hai apka ye chahne wala.",
+    "I hope this Christmas enriches your life,\nMay each day be happy & bright,\nOverflowing with pleasure & love,\nMay your Christmas be filled with delight..!!"
+  ];
+}
