@@ -1,6 +1,6 @@
 class Images{
   Images._();
-   static const images_path =[
+   static const imagesPath =[
     "http://andiwiniosapps.in/christmas/christmas_images/1.jpg",
     "http://andiwiniosapps.in/christmas/christmas_images/2.jpg",
     "http://andiwiniosapps.in/christmas/christmas_images/3.jpg",

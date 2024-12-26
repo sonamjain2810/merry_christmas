@@ -1,8 +1,14 @@
-import 'package:facebook_app_events/facebook_app_events.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'AdManager/ad_helper.dart';
+import 'Enums/project_routes_enum.dart';
+import 'Singleton/project_manager.dart';
 import 'data/Shayari.dart';
 import 'utils/SizeConfig.dart';
-import 'ShayariDetailPage.dart';
+import 'utils/pass_data_between_screens.dart';
+//import 'ShayariDetailPage.dart';
 
 class ShayariList extends StatefulWidget {
   @override
@@ -10,8 +16,42 @@ class ShayariList extends StatefulWidget {
 }
 
 class _ShayariListState extends State<ShayariList> {
-  static final facebookAppEvents = FacebookAppEvents();
-  var data = Shayari.shayari_data;
+  var data = Shayari.shayariData;
+  
+  BannerAd? _bannerAd;
+
+  @override
+  void initState() {
+    super.initState();
+    loadBannerAd().load();
+  }
+
+  BannerAd loadBannerAd() {
+    return BannerAd(
+    adUnitId: AdHelper.bannerAdUnitId,
+    request: const AdRequest(),
+    size: AdSize.banner,
+    listener: BannerAdListener(
+      onAdLoaded: (ad) {
+        setState(() {
+          _bannerAd = ad as BannerAd;
+        });
+      },
+      onAdFailedToLoad: (ad, err) {
+        debugPrint('Failed to load a banner ad: ${err.message}');
+        ad.dispose();
+      },
+    ),
+  );
+  }
+
+  
+
+  @override
+  void dispose() {
+    super.dispose();
+    _bannerAd?.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +59,7 @@ class _ShayariListState extends State<ShayariList> {
       appBar: AppBar(
         title: Text(
           "Shayari List",
-          style: Theme.of(context).appBarTheme.textTheme.headline1,
+          style: Theme.of(context).appBarTheme.toolbarTextStyle,
         ),
       ),
       body: SafeArea(
@@ -37,7 +77,7 @@ class _ShayariListState extends State<ShayariList> {
                                 border: Border.all(
                                   color: Theme.of(context)
                                       .colorScheme
-                                      .primaryVariant,
+                                      .primaryContainer,
                                 ),
                                 borderRadius:
                                     // 40 / 8.96 = 4.46
@@ -51,7 +91,7 @@ class _ShayariListState extends State<ShayariList> {
                               title: Text(
                                 data[index],
                                 maxLines: 2,
-                                style: Theme.of(context).textTheme.bodyText1,
+                                style: Theme.of(context).textTheme.labelLarge,
                               ),
                               trailing: Icon(Icons.arrow_forward_ios,
                                   color:
@@ -62,27 +102,31 @@ class _ShayariListState extends State<ShayariList> {
                       ),
                     ),
                     onTap: () {
-                      Navigator.push(
-                          context,
-                          new MaterialPageRoute(
-                              builder: (context) =>
-                                  ShayariDetailPage(index)));
+                      //Navigator.push(context,MaterialPageRoute(builder: (context) => ShayariDetailPage(index)));
 
-                      facebookAppEvents.logEvent(
-                        name: "Shayari List",
-                        parameters: {
-                          'clicked_on_shayari_index': '$index',
-                        },
-                      );
+                      ProjectManager.instance.clickOnButton(
+                          ProjectRoutes.shayariDetailPage.toString(),
+                          PassDataBetweenScreens("", index.toString()));
                     },
                   );
                 },
                 itemCount: data.length,
               )
-            : Center(
+            : const Center(
                 child: CircularProgressIndicator(),
               ),
       ),
+      bottomNavigationBar: BottomAppBar(
+            child: _bannerAd != null
+                ? SizedBox(
+                    width: _bannerAd!.size.width.toDouble(),
+                    height: _bannerAd!.size.height.toDouble(),
+                    child: AdWidget(
+                      ad: _bannerAd!,
+                    ),
+                  )
+                : Container(),
+          ),
     );
   }
 }

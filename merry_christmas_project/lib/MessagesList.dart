@@ -1,59 +1,106 @@
+import 'dart:io';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'AdManager/ad_helper.dart';
+import 'AdManager/ad_manager.dart';
+import 'Enums/project_routes_enum.dart';
+import 'Singleton/project_manager.dart';
 import 'data/Messages.dart';
-import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:flutter/material.dart';
-
+import 'data/Strings.dart';
 import 'utils/SizeConfig.dart';
-import 'MessageDetailPage.dart';
+import 'utils/pass_data_between_screens.dart';
 
 // ignore: must_be_immutable
 class MessagesList extends StatefulWidget {
-  String type;
-  MessagesList({this.type});
+  const MessagesList({super.key});
   @override
-  _MessagesListState createState() => _MessagesListState(type);
+  _MessagesListState createState() => _MessagesListState();
 }
 
-class _MessagesListState extends State<MessagesList> {
-  String type;
-  _MessagesListState(this.type);
-
-  static final facebookAppEvents = FacebookAppEvents();
+class _MessagesListState extends State<MessagesList>
+     {
+  late String type;
 
   var data;
 
+  BannerAd? _bannerAd;
+
+  @override
+  void initState() 
+  {
+    super.initState();
+    loadBannerAd().load();
+  }
+
+  BannerAd loadBannerAd() {
+    return BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          debugPrint('Failed to load a banner ad: ${err.message}');
+          ad.dispose();
+        },
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    debugPrint("MessageList: Dispose Called");
+
+    //projectManager.listener = null;
+    //adManager.adListener = null;
+
+    _bannerAd?.dispose();
+
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as PassDataBetweenScreens;
+    type = args.title;
+
+    debugPrint('Message List Build Method: Message type is $type');
+
     if (type == '1') {
       // English
-      data = Messages.english_data;
+      data = Messages.englishData;
     } else if (type == '4') {
       // Hindi
-      data = Messages.hindi_data;
-      
+      data = Messages.hindiData;
     } else if (type == '3') {
       // German
-      data = Messages.german_data;
+      data = Messages.germanData;
     } else if (type == '2') {
       // french
-      data = Messages.french_data;
+      data = Messages.frenchData;
     } else if (type == '5') {
       // Italian
-      data = Messages.italy_data;
+      data = Messages.italyData;
     } else if (type == '6') {
       // Portuguese
-      data = Messages.portugal_data;
-    } else {
+      data = Messages.portugalData;
+    } else if (type == '7') {
       // Spanish:
-      data = Messages.spanish_data;
+      data = Messages.spanishData;
+    } else {
+      data = Messages.englishData;
     }
-
-    
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           "Message List",
-          style: Theme.of(context).appBarTheme.textTheme.headline1,
+          style: Theme.of(context).appBarTheme.toolbarTextStyle,
         ),
       ),
       body: SafeArea(
@@ -62,18 +109,8 @@ class _MessagesListState extends State<MessagesList> {
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                          context,
-                          new MaterialPageRoute(
-                              builder: (context) =>
-                                  MessageDetailPage(type, index)));
-
-                      facebookAppEvents.logEvent(
-                        name: "Message List",
-                        parameters: {
-                          'clicked_on_message_index': '$index',
-                        },
-                      );
+                      ProjectManager.instance.clickOnButton(ProjectRoutes.messagesDetailPage.toString(),PassDataBetweenScreens(type, index.toString()));
+                      //Navigator.of(context).pushNamed(ProjectRoutes.messagesDetailPage.toString(),arguments: PassDataBetweenScreens("6", index.toString()));
                     },
                     child: Padding(
                       padding:
@@ -85,7 +122,7 @@ class _MessagesListState extends State<MessagesList> {
                                 border: Border.all(
                                   color: Theme.of(context)
                                       .colorScheme
-                                      .primaryVariant,
+                                      .primaryContainer,
                                 ),
                                 borderRadius:
                                     // 40 /8.98 = 4.46
@@ -98,7 +135,7 @@ class _MessagesListState extends State<MessagesList> {
                               title: Text(
                                 data[index],
                                 maxLines: 2,
-                                style: Theme.of(context).textTheme.bodyText1,
+                                style: Theme.of(context).textTheme.labelLarge,
                               ),
                               trailing: Icon(Icons.arrow_forward_ios,
                                   color:
@@ -112,10 +149,22 @@ class _MessagesListState extends State<MessagesList> {
                 },
                 itemCount: data.length,
               )
-            : Center(
+            : const Center(
                 child: CircularProgressIndicator(),
               ),
       ),
+      bottomNavigationBar: BottomAppBar(
+        child: _bannerAd != null
+            ? SizedBox(
+                width: _bannerAd!.size.width.toDouble(),
+                height: _bannerAd!.size.height.toDouble(),
+                child: AdWidget(
+                  ad: _bannerAd!,
+                ),
+              )
+            : Container(),
+      ),
     );
   }
+
 }

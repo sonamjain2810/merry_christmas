@@ -1,7 +1,7 @@
 class Quotes {
   Quotes._();
 
-  static const quotes_data = [
+  static const quotesData = [
     "One can never have enough socks, said Dumbledore. Another Christmas has come and gone and I didn’t get a single pair. People will insist on giving me books. ― J.K. Rowling",
     "The main reason Santa is so jolly is because he knows where all the bad girls live. ― George Carlin",
     "Let the children have their night of fun and laughter, let the gifts of Father Christmas delight their play. Let us grown-ups share to the full in their unstinted pleasures. ― Sir Winston Churchill",

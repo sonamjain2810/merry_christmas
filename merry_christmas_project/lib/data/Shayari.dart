@@ -1,6 +1,6 @@
 class Shayari {
   Shayari._();
-  static const shayari_data = [
+  static const shayariData = [
     "खुदा से क्या मांगू तुम्हारे वास्ते,\nसदा खुशियाँ हो तुम्हारे रास्ते,\nहंसी तुम्हारे चेहरे पर रहे कुछ इस तरह,\nखुशबू फूल का साथ निभाए जिस तरह !\nहैप्पी क्रिसमस",
     "No Greeting Card to Give\nNo Sweet Flowers to Send\nNo Cute Graphics to Forward\nJust A LOVING HEART\nSaying “HAPPY X’MAS”",
     "My Christmas message\nWrapped with love and happiness\nSaying thank you Mom & Dad\nFor your support the whole year through\nNow relax, you deserve the best.",

@@ -1,6 +1,6 @@
 class Gifs {
   Gifs._();
-  static const gifs_path = [
+  static const gifsPath = [
     "http://andiwiniosapps.in/christmas/christmas_gifs/1.gif",
     "http://andiwiniosapps.in/christmas/christmas_gifs/2.gif",
     "http://andiwiniosapps.in/christmas/christmas_gifs/3.gif",

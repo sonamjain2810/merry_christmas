@@ -1,22 +1,20 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:merry_christmas/utils/SizeConfig.dart';
+import '../utils/SizeConfig.dart';
 
 class CustomBannerWidget extends StatelessWidget {
   const CustomBannerWidget({
-    Key key,
-    @required this.size,
+    Key? key,
+    required this.size,
     this.imagePath,
     this.topText,
     this.middleText,
     this.bottomText,
     this.buttonText,
-    this.ontap,
   }) : super(key: key);
 
   final Size size;
-  final String imagePath, topText, middleText, bottomText, buttonText;
-  final Function ontap;
+  final String? imagePath, topText, middleText, bottomText, buttonText;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +22,7 @@ class CustomBannerWidget extends StatelessWidget {
       builder: (context, constraints) {
         return InkWell(
           child: Container(
-            color: Colors.blue.shade700,
+            color: Colors.green.shade400,
             height: size.height * 0.35,
             width: constraints.maxWidth,
             child: Stack(
@@ -33,11 +31,11 @@ class CustomBannerWidget extends StatelessWidget {
                   bottom: 0,
                   top: 0,
                   left: 0,
-                  child: Container(
+                  child: SizedBox(
                     height: constraints.maxHeight * 1,
                     width: constraints.maxWidth / 2.5,
                     child: CachedNetworkImage(
-                      imageUrl: imagePath,
+                      imageUrl: imagePath!,
                       fit: BoxFit.fill,
                       placeholder: (context, url) =>
                           const CircularProgressIndicator(),
@@ -54,34 +52,34 @@ class CustomBannerWidget extends StatelessWidget {
                     bottom: 0,
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Container(
+                      child: SizedBox(
                         width: constraints.maxWidth / 1.75,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
-                            Text(topText,
+                            Text(topText!,
                                 style: Theme.of(context)
                                     .textTheme
-                                    .bodyText1
-                                    .copyWith(
+                                    .titleLarge
+                                    ?.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white),
                                 textAlign: TextAlign.center),
                             Text(
-                              middleText,
+                              middleText!,
                               style: Theme.of(context)
                                   .textTheme
-                                  .headline1
-                                  .copyWith(
+                                  .titleLarge
+                                  ?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white),
                               textAlign: TextAlign.center,
                             ),
-                            Text(bottomText,
+                            Text(bottomText!,
                                 style: Theme.of(context)
                                     .textTheme
-                                    .subtitle1
-                                    .copyWith(
+                                    .titleLarge
+                                    ?.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white),
                                 textAlign: TextAlign.center),
@@ -94,11 +92,11 @@ class CustomBannerWidget extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: <Widget>[
                                   Text(
-                                    buttonText,
+                                    buttonText!,
                                     style: Theme.of(context)
                                         .textTheme
-                                        .bodyText2
-                                        .copyWith(color: Colors.white),
+                                        .bodyMedium
+                                        ?.copyWith(color: Colors.white),
                                   ),
                                   Padding(
                                     padding: EdgeInsets.only(
@@ -120,7 +118,6 @@ class CustomBannerWidget extends StatelessWidget {
               ],
             ),
           ),
-          onTap: ontap,
         );
       },
     );

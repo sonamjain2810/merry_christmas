@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "426472173953",
+    "project_id": "message-for-all-ocassion-2",
+    "storage_bucket": "message-for-all-ocassion-2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:426472173953:android:ec57c3b798f813358bf880",
+        "android_client_info": {
+          "package_name": "merry.christmas.messages.wishes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "426472173953-tpalm8vs0j6lcj5bclos2snc7bcu37b4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfaerV2rv0faCQGQyEdXBfoObMe3O5VXk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "426472173953-tpalm8vs0j6lcj5bclos2snc7bcu37b4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "426472173953-59c4omhpg6e4ugtmbu3iv1qla8deadit.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "happy.canada.day.1stjuly"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

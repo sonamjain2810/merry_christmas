@@ -1,7 +1,7 @@
 class Messages {
   Messages._();
 
-  static const english_data = [
+  static const englishData = [
     // english
 
     "❆ May the holiday season end the present year on a cheerful note and make way for a fresh and bright New Year. Merry Christmas to you and your family!",
@@ -213,7 +213,7 @@ class Messages {
     "May joy and happiness snow on you, may the bells jingle for you and may Santa be extra good to you! Merry Christmas!"
   ];
 
-  static const french_data = [
+  static const frenchData = [
     // french
 
     "Joie, amour, bonheur et rires sont les ingrédients indispensables pour passer un bon réveillon de Noël. J'ai demandé au père Noël de les déposer un peu en avance dans l'une de tes chaussettes accrochées à la cheminée pour que tu puisses vivre le plus beau Noël de ta vie ! Joyeuses fêtes !",
@@ -304,7 +304,7 @@ class Messages {
 
     "Notre famille, au complet réunie,\nEn images et à l’écrit\nPour vous envoyer nos vœux\nLes plus chaleureux !"
   ];
-  static const german_data = [
+  static const germanData = [
     // german
     "Ich bin die kleine Weihnachtsfee,\nund stecke fest im dichten Schnee.\nDrum schick ich dir aus weiter Ferne\neine Hand voll Zaubersterne.\nFrohe Weihnachten!",
 
@@ -378,7 +378,7 @@ class Messages {
     "Christkind, Christkind, guter Gast,\nhast du mir was mitgebracht?\nHast du was, dann setz dich nieder,\nhast du nichts, dann geh gleich wieder!"
   ];
 
-  static const hindi_data = [
+  static const hindiData = [
     // hindi
 
     "आपकी आंखों से सजे हो जो भी सपने,\nऔर दिल में छुपी हो जो भी अभिलाषाएं,\nयह किसमस का पर्व उन्हें सच कर जाए,\nआपके लिए है हमारी यही शुभकामनाएं..\nमेरी क्रिसमस",
@@ -434,7 +434,7 @@ class Messages {
     "Christmas ka ye pyara sa tyohaar\nJeevan me laye khushiyan apaar\nSanta clause aayee aapke dwar\nSubhkamna hamari kare sweekar."
   ];
 
-  static const italy_data = [
+  static const italyData = [
     // italy
 
     "Questa frase è in una scatola di pace, piena di gioia, avvolta con amore, firmata con un sorriso e inviata con un bacio. Buon Natale!",
@@ -562,7 +562,7 @@ class Messages {
     "Straordinari, Stravaganti, Suonanti, Speciali, Strepitosi, Straordinari, Splendenti, Sorprendenti, Sinceri, Sereni, Simpatici, AuguriSSimi di Buon Natale e Buone Feste a Tutti!"
   ];
 
-  static const portugal_data = [
+  static const portugalData = [
     // portugal
 
     "O verdadeiro espírito do Natal encontra-se presente em todas as boas ações que fazemos durante a nossa vida!",
@@ -651,7 +651,7 @@ class Messages {
 
     "Natal é época de sonhos, esperanças renovadas e mensagens trocadas com carinho e amizade."
   ];
-  static const spanish_data = [
+  static const spanishData = [
     // spainsh
 
     " La Navidad se trata de pasar tiempo con familiares y amigos. Se trata de crear recuerdos felices que durarán toda la vida. ¡Feliz Navidad para ti y tu familia!",

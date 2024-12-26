@@ -1,8 +1,13 @@
-import 'package:facebook_app_events/facebook_app_events.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
-
-import 'QuotesDetailPage.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'utils/pass_data_between_screens.dart';
+import 'AdManager/ad_helper.dart';
+import 'AdManager/ad_manager.dart';
+import 'Enums/project_routes_enum.dart';
+import 'Singleton/project_manager.dart';
 import 'data/Quotes.dart';
+import 'data/Strings.dart';
 import 'utils/SizeConfig.dart';
 
 class QuotesList extends StatefulWidget {
@@ -10,9 +15,42 @@ class QuotesList extends StatefulWidget {
   _QuotesListState createState() => _QuotesListState();
 }
 
-class _QuotesListState extends State<QuotesList> {
-  static final facebookAppEvents = FacebookAppEvents();
-  var data = Quotes.quotes_data;
+class _QuotesListState extends State<QuotesList>
+{
+  var data = Quotes.quotesData;
+
+  BannerAd? _bannerAd;
+
+  @override
+  void initState() {
+    super.initState();
+    loadBannerAd().load();
+  }
+
+  BannerAd loadBannerAd() {
+    return BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          debugPrint('Failed to load a banner ad: ${err.message}');
+          ad.dispose();
+        },
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _bannerAd?.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,27 +58,19 @@ class _QuotesListState extends State<QuotesList> {
       appBar: AppBar(
         title: Text(
           "Quotes List",
-          style: Theme.of(context).appBarTheme.textTheme.headline1,
+          style: Theme.of(context).appBarTheme.toolbarTextStyle,
         ),
       ),
       body: SafeArea(
+        // ignore: unnecessary_null_comparison
         child: data != null
             ? ListView.builder(
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                          context,
-                          new MaterialPageRoute(
-                              builder: (context) =>
-                                  QuotesDetailPage(index)));
-
-                      facebookAppEvents.logEvent(
-                        name: "Quotes List",
-                        parameters: {
-                          'clicked_on_quotes_index': '$index',
-                        },
-                      );
+                      ProjectManager.instance.clickOnButton(
+                          ProjectRoutes.quotesDetailPage.toString(),
+                          PassDataBetweenScreens("6", index.toString()));
                     },
                     child: Padding(
                       padding:
@@ -52,7 +82,7 @@ class _QuotesListState extends State<QuotesList> {
                                 border: Border.all(
                                   color: Theme.of(context)
                                       .colorScheme
-                                      .primaryVariant,
+                                      .primaryContainer,
                                 ),
                                 borderRadius:
                                     // 40 /8.98 = 4.46
@@ -65,7 +95,7 @@ class _QuotesListState extends State<QuotesList> {
                               title: Text(
                                 data[index],
                                 maxLines: 2,
-                                style: Theme.of(context).textTheme.bodyText1,
+                                style: Theme.of(context).textTheme.labelLarge,
                               ),
                               trailing: Icon(Icons.arrow_forward_ios,
                                   color:
@@ -79,10 +109,22 @@ class _QuotesListState extends State<QuotesList> {
                 },
                 itemCount: data.length,
               )
-            : Center(
+            : const Center(
                 child: CircularProgressIndicator(),
               ),
       ),
+      bottomNavigationBar: BottomAppBar(
+        child: _bannerAd != null
+            ? SizedBox(
+                width: _bannerAd!.size.width.toDouble(),
+                height: _bannerAd!.size.height.toDouble(),
+                child: AdWidget(
+                  ad: _bannerAd!,
+                ),
+              )
+            : Container(),
+      ),
     );
   }
+
 }

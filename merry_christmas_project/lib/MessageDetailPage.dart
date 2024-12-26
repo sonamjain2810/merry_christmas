@@ -1,108 +1,94 @@
 import 'dart:async';
-import 'package:esys_flutter_share/esys_flutter_share.dart';
-import 'package:facebook_app_events/facebook_app_events.dart';
-import 'package:firebase_admob/firebase_admob.dart';
-import 'package:flutter/cupertino.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_admob/native_admob_controller.dart';
-
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:share_plus/share_plus.dart';
+import 'AdManager/ad_helper.dart';
 import 'data/Messages.dart';
 import 'data/Strings.dart';
 import 'utils/SizeConfig.dart';
-import 'NativeAdContainer.dart';
+import 'utils/pass_data_between_screens.dart';
 
 /*
 how to pass data into another screen watch this video
 https://www.youtube.com/watch?v=d5PpeNb-dOY
  */
-
 class MessageDetailPage extends StatefulWidget {
-  String type;
-  int defaultIndex;
-  MessageDetailPage(this.type, this.defaultIndex);
+  MessageDetailPage({super.key});
   @override
-  _MessageDetailPageState createState() =>
-      _MessageDetailPageState(type, defaultIndex);
+  _MessageDetailPageState createState() => _MessageDetailPageState();
 }
 
 class _MessageDetailPageState extends State<MessageDetailPage> {
-  String type;
-  int defaultIndex;
-  _MessageDetailPageState(this.type, this.defaultIndex);
-  static final facebookAppEvents = FacebookAppEvents();
-
-  // Native Ad Open
-static String _adUnitID = Strings.iosAdmobNativeId;
-  final _nativeAdController = NativeAdmobController();
-  double _height = 0;
-
-  StreamSubscription _subscription;
-
+  
+  late String type;
+  late int defaultIndex;
   var data = [];
 
-//Native Ad Close
+  BannerAd? _bannerAd;
 
   @override
   void initState() {
     super.initState();
+    loadBannerAd().load();
+  }
 
-    //Native Ad
-    _subscription = _nativeAdController.stateChanged.listen(_onStateChanged);
-    //
+  BannerAd loadBannerAd() {
+    return BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          debugPrint('Failed to load a banner ad: ${err.message}');
+          ad.dispose();
+        },
+      ),
+    );
   }
 
   @override
   void dispose() {
-    //Native Ad
-    _subscription.cancel();
-    _nativeAdController.dispose();
     super.dispose();
-  }
-
-  void _onStateChanged(AdLoadState state) {
-    switch (state) {
-      case AdLoadState.loading:
-        setState(() {
-          _height = 0;
-        });
-        break;
-
-      case AdLoadState.loadCompleted:
-        setState(() {
-          _height = 36.83 * SizeConfig.heightMultiplier;
-        });
-        break;
-
-      default:
-        break;
-    }
+    _bannerAd!.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-     if (type == '1') {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as PassDataBetweenScreens;
+    type = args.title;
+    defaultIndex = int.parse(args.message);
+
+    if (type == '1') {
       // English
-      data = Messages.english_data;
+      data = Messages.englishData;
     } else if (type == '4') {
       // Hindi
-      data = Messages.hindi_data;
+      data = Messages.hindiData;
     } else if (type == '3') {
       // German
-      data = Messages.german_data;
+      data = Messages.germanData;
     } else if (type == '2') {
       // french
-      data = Messages.french_data;
+      data = Messages.frenchData;
     } else if (type == '5') {
       // Italian
-      data = Messages.italy_data;
+      data = Messages.italyData;
     } else if (type == '6') {
       // Portuguese
-      data = Messages.portugal_data;
-    } else {
+      data = Messages.portugalData;
+    } else if (type == '7') {
       // Spanish:
-      data = Messages.spanish_data;
+      data = Messages.spanishData;
+    } else {
+      data = Messages.englishData;
     }
-
 
     return PageView.builder(
       controller: PageController(
@@ -112,7 +98,7 @@ static String _adUnitID = Strings.iosAdmobNativeId;
           appBar: AppBar(
               title: Text(
             "Message No. ${index + 1}",
-            style: Theme.of(context).appBarTheme.textTheme.headline1,
+            style: Theme.of(context).appBarTheme.toolbarTextStyle,
           )),
           body: SafeArea(
             child: Padding(
@@ -120,40 +106,38 @@ static String _adUnitID = Strings.iosAdmobNativeId;
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
                 child: Card(
-                  child: new Container(
-                    padding:
-                        new EdgeInsets.all(1.93 * SizeConfig.widthMultiplier),
-                    child: new Column(
+                  child: Container(
+                    padding: EdgeInsets.all(1.93 * SizeConfig.widthMultiplier),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(data[index],
-                            style: Theme.of(context).textTheme.bodyText1),
+                        Center(
+                          child: Text(data[index],
+                              style: Theme.of(context).textTheme.bodyLarge),
+                        ),
                         Padding(
                           padding: EdgeInsets.only(
                               top: 1.93 * SizeConfig.widthMultiplier),
-                          child: new Row(
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: <Widget>[
-                              RaisedButton(
-                                  child: Text("Share"),
-                                  onPressed: () {
-                                    print("Share Button Clicked");
-                                    shareText(data[index] +
-                                        "\n" +
-                                        "Share Via:" +
-                                        "\n" +
-                                        Strings.shareAppText);
-                                  }),
+                              Builder(builder: (BuildContext context) {
+                                return ElevatedButton(
+                                    child: const Text("Share"),
+                                    onPressed: () {
+                                      debugPrint("Share Button Clicked");
+                                      _onShare(
+                                          context,
+                                          data[index] +
+                                              "\n" +
+                                              "Share Via:" +
+                                              "\n" +
+                                              Strings.shareAppText);
+                                    });
+                              }),
                             ],
                           ),
                         ),
-                        Divider(),
-                        NativeAdContainer(
-                            height: _height,
-                            adUnitID: _adUnitID,
-                            nativeAdController: _nativeAdController,
-                            numberAds: 1,
-                            ),
                       ],
                     ),
                   ),
@@ -161,23 +145,53 @@ static String _adUnitID = Strings.iosAdmobNativeId;
               ),
             ),
           ),
+          bottomNavigationBar: BottomAppBar(
+            child: _bannerAd != null
+                ? SizedBox(
+                    width: _bannerAd!.size.width.toDouble(),
+                    height: _bannerAd!.size.height.toDouble(),
+                    child: AdWidget(
+                      ad: _bannerAd!,
+                    ),
+                  )
+                : Container(),
+          ),
         );
       },
     );
   }
 
+  void _onShare(BuildContext context, String text) async {
+    // A builder is used to retrieve the context immediately
+    // surrounding the ElevatedButton.
+    //
+    // The context's `findRenderObject` returns the first
+    // RenderObject in its descendent tree when it's not
+    // a RenderObjectWidget. The ElevatedButton's RenderObject
+    // has its position and size after it's built.
+    final box = context.findRenderObject() as RenderBox?;
+
+    /*if (imagePaths.isNotEmpty) {
+      final files = <XFile>[];
+      for (var i = 0; i < imagePaths.length; i++) {
+        files.add(XFile(imagePaths[i], name: imageNames[i]));
+      }
+      await Share.shareXFiles(files,
+          text: text,
+          subject: subject,
+          sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size);
+    } else {*/
+    await Share.share(text,
+        subject: "Share",
+        sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size);
+    //}
+  }
+
   Future<void> shareText(String message) async {
     try {
-      Share.text('Share Message', message, 'text/plain');
+      Share.share(message);
     } catch (e) {
-      print('error: $e');
+      debugPrint('error: $e');
     }
-
-    facebookAppEvents.logEvent(
-      name: "Message Share",
-      parameters: {
-        'message_shared': '$message',
-      },
-    );
   }
 }

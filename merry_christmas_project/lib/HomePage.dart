@@ -1,37 +1,26 @@
 import 'dart:async';
-import 'dart:io';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:merry_christmas/AdManager/ad_manager.dart';
+import 'package:merry_christmas/Singleton/project_manager.dart';
 import 'package:merry_christmas/data/Messages.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:facebook_app_events/facebook_app_events.dart';
-import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_native_admob/native_admob_controller.dart';
-import 'package:merry_christmas/StatusList.dart';
+import 'package:merry_christmas/utils/pass_data_between_screens.dart';
 import 'package:merry_christmas/widgets/CustomFBTextWidget.dart';
 import 'package:merry_christmas/widgets/CustomFeatureCard.dart';
-import 'package:merry_christmas/widgets/CustomFullCard.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'QuotesList.dart';
-import 'ShayariList.dart';
+import 'AdManager/ad_helper.dart';
+import 'Enums/project_routes_enum.dart';
 import 'data/Gifs.dart';
 import 'data/Images.dart';
 import 'data/Quotes.dart';
 import 'data/Shayari.dart';
 import 'data/Status.dart';
-import 'data/Strings.dart';
 import 'utils/SizeConfig.dart';
-import 'AboutUs.dart';
-import 'GifsImages.dart';
-import 'ImagesList.dart';
-import 'MemeGenerator.dart';
-import 'MessagesList.dart';
 import 'MyDrawer.dart';
-import 'NativeAdContainer.dart';
+import 'widgets/AppStoreAppsItemWidget1.dart';
 import 'widgets/CustomBannerWidget.dart';
 import 'widgets/CustomTextOnlyWidget.dart';
-import 'widgets/CustomTextReadMoreWidget.dart';
+import 'widgets/DesignerContainer.dart';
 
 // Height = 8.96
 // Width = 4.14
@@ -43,324 +32,110 @@ class HomePage extends StatefulWidget {
 
 // const String testDevice = 'testDeviceId';
 
-class _HomePageState extends State<HomePage> {
-  static final facebookAppEvents = FacebookAppEvents();
-  String interstitialTag = "";
-
-// Native Ad Open
-  static String _adUnitID = Platform.isAndroid ?
-  Strings.androidAdmobNativeId: Strings.iosAdmobNativeId;
-
-  final _nativeAdController = NativeAdmobController();
-  double _height = 0;
-  
-  StreamSubscription _subscription;
-
+class _HomePageState extends State<HomePage>
+    implements ProjectListener, AdListener {
   String _authStatus = 'Unknown';
 
-
-//Native Ad Close
-
-  static const MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
-    testDevices: Strings.testDevice != null ? <String>[Strings.testDevice] : null,
-    //keywords: Keywords.adsKeywords,
-    //contentUrl: 'http://foo.com/bar.html',
-    childDirected: false,
-    nonPersonalizedAds: true,
-  );
-
-  InterstitialAd _interstitialAd;
-
-  bool _isInterstitialAdReady = false;
-
-
-  InterstitialAd createInterstitialAd() {
-    return InterstitialAd(
-      adUnitId: Platform.isAndroid ?
-      Strings.androidAdmobInterstitialId: Strings.iosAdmobInterstitialId,
-      targetingInfo: targetingInfo,
-      listener: (MobileAdEvent event) {
-        print(
-             "InterstitialAdId " + _interstitialAd.adUnitId
-          );
-        print("InterstitialAd event $event");
-        if (event == MobileAdEvent.closed) {
-          _isInterstitialAdReady = false;
-          _interstitialAd = createInterstitialAd()..load();
-
-          if (interstitialTag != null) {
-            switch (interstitialTag) {
-              case "message":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) => MessagesList()));
-                break;
-              case "lang_english":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        MessagesList(type: "1")));
-                break;
-
-              case "lang_french":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        MessagesList(type: "2")));
-                break;
-
-              case "lang_german":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        MessagesList(type: "3")));
-                break;
-
-              case "lang_hindi":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        MessagesList(type: "4")));
-                break;
-
-              case "lang_italian":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        MessagesList(type: "5")));
-                break;
-
-              case "lang_portuguese":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        MessagesList(type: "6")));
-                break;
-
-              case "lang_spanish":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        MessagesList(type: "7")));
-                break;
-              case "gif":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) => GifsImages()));
-                break;
-
-              case "image":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) => ImagesList()));
-                break;
-
-              case "shayari":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) => ShayariList()));
-                break;
-            
-              case "meme":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) => MemeGenerator()));
-                break;
-
-              case "about":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) => AboutUs()));
-                break;
-
-              case "status":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) => StatusList()));
-                break;
-
-              case "quotes":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) => QuotesList()));
-                break;
-              default:
-            }
-          }
-        } else if (event == MobileAdEvent.opened || event == MobileAdEvent.failedToLoad) {
-          _isInterstitialAdReady = false;
-          if (interstitialTag != null) {
-            switch (interstitialTag) {
-              case "message":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) => MessagesList()));
-                break;
-
-              case "lang_english":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        MessagesList(type: "1")));
-                break;
-
-              case "lang_french":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        MessagesList(type: "2")));
-                break;
-
-              case "lang_german":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        MessagesList(type: "3")));
-                break;
-
-              case "lang_hindi":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        MessagesList(type: "4")));
-                break;
-
-              case "lang_italian":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        MessagesList(type: "5")));
-                break;
-
-              case "lang_portuguese":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        MessagesList(type: "6")));
-                break;
-
-              case "lang_spanish":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        MessagesList(type: "7")));
-                break;
-
-              case "gif":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) => GifsImages()));
-                break;
-
-              case "image":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) => ImagesList()));
-                break;
-
-              case "shayari":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) => ShayariList()));
-                break;
-
-              case "meme":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) => MemeGenerator()));
-                break;
-
-              case "about":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) => AboutUs()));
-                break;
-
-              case "status":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) => StatusList()));
-                break;
-
-              case "quotes":
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) => QuotesList()));
-                break;
-              default:
-            }
-          }
-        }
-        else if(event == MobileAdEvent.loaded)
-      {
-        _isInterstitialAdReady = true;
-      } 
-        
-        else {
-          print(
-             "InterstitialAdId " + _interstitialAd.adUnitId
-          );
-          print(event.toString());
-        }
-      },
-    );
-  }
+  BannerAd? _bannerAd;
+  ProjectManager projectManager = ProjectManager.instance;
+  AdManager adManager = AdManager.instance;
 
   @override
   void initState() {
     super.initState();
-    FirebaseAdMob.instance.initialize(
-      appId: Platform.isAndroid ? Strings.androidAdmobAppId : Strings.iosAdmobAppId
-      );
+    WidgetsFlutterBinding.ensureInitialized()
+        .addPostFrameCallback((_) => initPlugin());
 
-      initPlugin();
+    projectManager.listener = this;
 
-    _interstitialAd?.dispose();
-    _interstitialAd = createInterstitialAd()..load();
+    adManager.adListener = this;
 
-    //Native Ad
-    _subscription = _nativeAdController.stateChanged.listen(_onStateChanged);
-    _nativeAdController.setTestDeviceIds([
-      Strings.testDevice
-    ]);
-    //
+    projectManager.startApp();
+
+    adManager.loadAdsInAdManager();
+  }
+
+  BannerAd loadBannerAd() {
+    return BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          debugPrint('Failed to load a banner ad: ${err.message}');
+          ad.dispose();
+        },
+      ),
+    );
   }
 
   @override
   void dispose() {
-    _interstitialAd?.dispose();
-    //Native Ad
-    _subscription.cancel();
-    _nativeAdController.dispose();
     super.dispose();
+
+    debugPrint("Home Page: Dispose Called");
+    projectManager.listener = null;
+    adManager.adListener = null;
   }
 
-   // Platform messages are asynchronous, so we initialize in an async method.
+  // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlugin() async {
-    TrackingStatus status;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      status = await AppTrackingTransparency.requestTrackingAuthorization();
-    } on PlatformException {
-      _authStatus = 'Failed to open tracking auth dialog.';
+    final TrackingStatus status =
+        await AppTrackingTransparency.trackingAuthorizationStatus;
+    setState(() => _authStatus = '$status');
+    // If the system can show an authorization request dialog
+    if (status == TrackingStatus.notDetermined) {
+      // Show a custom explainer dialog before the system dialog
+      await showCustomTrackingDialog(context);
+      // Wait for dialog popping animation
+      await Future.delayed(const Duration(milliseconds: 200));
+      // Request system's tracking authorization dialog
+      final TrackingStatus status =
+          await AppTrackingTransparency.requestTrackingAuthorization();
+      setState(() => _authStatus = '$status');
     }
 
     final uuid = await AppTrackingTransparency.getAdvertisingIdentifier();
-    print("UUID: $uuid");
-
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _authStatus = "$status";
-    });
+    debugPrint("UUID: $uuid");
   }
 
-  void _onStateChanged(AdLoadState state) {
-    switch (state) {
-      case AdLoadState.loading:
-        setState(() {
-          _height = 0;
-        });
-        break;
-
-      case AdLoadState.loadCompleted:
-        setState(() {
-          _height = 36.83 * SizeConfig.heightMultiplier;
-        });
-        break;
-
-      default:
-        break;
-    }
-  }
+  Future<void> showCustomTrackingDialog(BuildContext context) async =>
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Dear User'),
+          content: const Text(
+            'We care about your privacy and data security. We keep this app free by showing ads. '
+            'Can we continue to use your data to tailor ads for you?\n\nYou can change your choice anytime in the app settings. '
+            'Our partners will collect data and use a unique identifier on your device to show you ads.',
+            style: TextStyle(color: Colors.black),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Continue'),
+            ),
+          ],
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return Scaffold(
-     
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Home",
-          style: Theme.of(context).appBarTheme.textTheme.headline1,
         ),
       ),
       body: SafeArea(
         child: Stack(
           children: <Widget>[
-            
             SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Column(
@@ -371,12 +146,12 @@ class _HomePageState extends State<HomePage> {
                       padding: EdgeInsets.all(SizeConfig.width(8)),
                       child: Center(
                         child: Text("Choose Wishes From Below",
-                            style: Theme.of(context).textTheme.headline1),
+                            style: Theme.of(context).textTheme.headlineSmall),
                       ),
                     ),
                   ),
 
-                  Divider(),
+                  const Divider(),
 
                   // Wishes Start
                   DesignerContainer(
@@ -386,189 +161,119 @@ class _HomePageState extends State<HomePage> {
                         Padding(
                           padding: EdgeInsets.all(SizeConfig.width(8)),
                           child: Text("Select Your Languages For Wishes  ",
-                              style: Theme.of(context).textTheme.headline1),
+                              style: Theme.of(context).textTheme.headlineSmall),
                         ),
                         Padding(
                           padding: EdgeInsets.all(SizeConfig.width(8)),
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
-                                                      child: Row(
+                            child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: <Widget>[
-                                CustomTextOnlyWidget(
-                                  language: "English",
-                                  size: size,
-                                  color: Colors.orange,
-                                  text: Messages.english_data[2],
-                                  ontap: () {
-                                    print("English Message Clicked");
-                                    interstitialTag = "lang_english";
-                                    facebookAppEvents.logEvent(
-                                      name: "Message List",
-                                      parameters: {
-                                        'button_id': 'lang_english_button',
-                                      },
-                                    );
-                                    _isInterstitialAdReady == true
-                                        ? _interstitialAd?.show()
-                                        : Navigator.of(context).push(
-                                            new MaterialPageRoute(
-                                                builder: (BuildContext context) =>
-                                                    MessagesList(type: "1")));
+                                InkWell(
+                                  child: CustomTextOnlyWidget(
+                                    language: "English",
+                                    size: size,
+                                    color: Colors.orange,
+                                    text: Messages.englishData[2],
+                                  ),
+                                  onTap: () {
+                                    debugPrint("English Message Clicked");
+                                    ProjectManager.instance.clickOnButton(
+                                        ProjectRoutes.messagesList.toString(),
+                                        PassDataBetweenScreens("1", "1"));
                                   },
                                 ),
-                                
-                           
                                 SizedBox(width: SizeConfig.width(5)),
-
-                                CustomTextOnlyWidget(
-                                  size: size,
-                                  language: "हिंदी",
-                                  text: Messages.hindi_data[0],
-                                  color: Colors.brown,
-                                  ontap: () {
-                                    print("Hindi Clicked");
-                                    interstitialTag = "lang_hindi";
-                                    facebookAppEvents.logEvent(
-                                      name: "Message List",
-                                      parameters: {
-                                        'button_id': 'lang_hindi_button',
-                                      },
-                                    );
-                                    _isInterstitialAdReady == true
-                                        ? _interstitialAd?.show()
-                                        : Navigator.of(context).push(
-                                            new MaterialPageRoute(
-                                                builder: (BuildContext context) =>
-                                                    MessagesList(type: "4")));
+                                InkWell(
+                                  child: CustomTextOnlyWidget(
+                                    size: size,
+                                    language: "हिंदी",
+                                    text: Messages.hindiData[0],
+                                    color: Colors.orange.shade800,
+                                  ),
+                                  onTap: () {
+                                    debugPrint("Hindi Message Clicked");
+                                    ProjectManager.instance.clickOnButton(
+                                        ProjectRoutes.messagesList.toString(),
+                                        PassDataBetweenScreens("4", "4"));
                                   },
                                 ),
-
                                 SizedBox(width: SizeConfig.width(5)),
-
-                                CustomTextOnlyWidget(
-                                  size: size,                           
-                                  language: "Español",
-                                  text: Messages.spanish_data[6],
-                                  color: Colors.deepOrangeAccent,
-                                  ontap: () {
-                                    print("For All Clicked");
-                                    interstitialTag = "lang_spanish";
-                                    facebookAppEvents.logEvent(
-                                      name: "Message List",
-                                      parameters: {
-                                        'button_id': 'lang_spanish_button',
-                                      },
-                                    );
-                                    _isInterstitialAdReady == true
-                                        ? _interstitialAd?.show()
-                                        : Navigator.of(context).push(
-                                            new MaterialPageRoute(
-                                                builder: (BuildContext context) =>
-                                                    MessagesList(type: "7")));
+                                InkWell(
+                                  child: CustomTextOnlyWidget(
+                                    size: size,
+                                    language: "Español",
+                                    text: Messages.spanishData[6],
+                                    color: Colors.pinkAccent,
+                                  ),
+                                  onTap: () {
+                                    debugPrint("Spanish Message Clicked");
+                                    ProjectManager.instance.clickOnButton(
+                                        ProjectRoutes.messagesList.toString(),
+                                        PassDataBetweenScreens("7", "7"));
                                   },
                                 ),
-                                
                                 SizedBox(width: SizeConfig.width(5)),
-                                
-                                CustomTextOnlyWidget(
-                                  size: size,                            
-                                  language: "Deutsche",
-                                  text: Messages.german_data[8],
-                                  color: Colors.redAccent,
-                                  ontap: () {
-                                    print("German Clicked");
-                                    interstitialTag = "lang_german";
-                                    facebookAppEvents.logEvent(
-                                      name: "Message List",
-                                      parameters: {
-                                        'button_id': 'lang_german_button',
-                                      },
-                                    );
-                                    _isInterstitialAdReady == true
-                                        ? _interstitialAd?.show()
-                                        : Navigator.of(context).push(
-                                            new MaterialPageRoute(
-                                                builder: (BuildContext context) =>
-                                                    MessagesList(type: "3")));
+                                InkWell(
+                                  child: CustomTextOnlyWidget(
+                                    size: size,
+                                    language: "Deutsche",
+                                    text: Messages.germanData[8],
+                                    color: Colors.blueGrey,
+                                  ),
+                                  onTap: () {
+                                    debugPrint("German Message Clicked");
+                                    ProjectManager.instance.clickOnButton(
+                                        ProjectRoutes.messagesList.toString(),
+                                        PassDataBetweenScreens("3", "3"));
                                   },
                                 ),
-                                
                                 SizedBox(width: SizeConfig.width(5)),
-                                
-                                CustomTextOnlyWidget(
+                                InkWell(
+                                  child: CustomTextOnlyWidget(
                                     size: size,
                                     language: "français",
-                                    text: Messages.french_data[5],
-                                    color: Colors.blueGrey,
-                                    ontap: () {
-                                      print("français Clicked");
-                                      interstitialTag = "lang_french";
-                                      facebookAppEvents.logEvent(
-                                        name: "Message List",
-                                        parameters: {
-                                          'button_id': 'lang_french_button',
-                                        },
-                                      );
-                                      _isInterstitialAdReady == true
-                                          ? _interstitialAd?.show()
-                                          : Navigator.of(context).push(
-                                              new MaterialPageRoute(
-                                                  builder: (BuildContext
-                                                          context) =>
-                                                      MessagesList(type: "2")));
-                                    }), 
-
-                                SizedBox(width: SizeConfig.width(5)),
-
-                                CustomTextOnlyWidget(
-                                  size: size,
-                                  language: "Italiano",
-                                  text: Messages.italy_data[0],
-                                  color: Colors.green[400],
-                                  ontap: () {
-                                    print("Italian Clicked");
-                                    interstitialTag = "lang_italian";
-                                    facebookAppEvents.logEvent(
-                                      name: "Message List",
-                                      parameters: {
-                                        'button_id': 'lang_italian_button',
-                                      },
-                                    );
-                                    _isInterstitialAdReady == true
-                                        ? _interstitialAd?.show()
-                                        : Navigator.of(context).push(
-                                            new MaterialPageRoute(
-                                                builder: (BuildContext context) =>
-                                                    MessagesList(type: "5")));
+                                    text: Messages.frenchData[5],
+                                    color: Colors.greenAccent,
+                                  ),
+                                  onTap: () {
+                                    debugPrint("French Message Clicked");
+                                    ProjectManager.instance.clickOnButton(
+                                        ProjectRoutes.messagesList.toString(),
+                                        PassDataBetweenScreens("2", "2"));
                                   },
                                 ),
-
                                 SizedBox(width: SizeConfig.width(5)),
-
-                                CustomTextOnlyWidget(
-                                  size: size,                            
-                                  language: "Português",
-                                  text: Messages.portugal_data[1],
-                                  color: Colors.deepPurpleAccent,
-                                  ontap: () {
-                                    print("Portuguese Clicked");
-                                    interstitialTag = "lang_portuguese";
-                                    facebookAppEvents.logEvent(
-                                      name: "Message List",
-                                      parameters: {
-                                        'button_id': 'lang_portuguese_button',
-                                      },
-                                    );
-                                    _isInterstitialAdReady == true
-                                        ? _interstitialAd?.show()
-                                        : Navigator.of(context).push(
-                                            new MaterialPageRoute(
-                                                builder: (BuildContext context) =>
-                                                    MessagesList(type: "6")));
+                                InkWell(
+                                  child: CustomTextOnlyWidget(
+                                    size: size,
+                                    language: "Italiano",
+                                    text: Messages.italyData[0],
+                                    color: Colors.indigoAccent,
+                                  ),
+                                  onTap: () {
+                                    debugPrint("Italian Message Clicked");
+                                    ProjectManager.instance.clickOnButton(
+                                        ProjectRoutes.messagesList.toString(),
+                                        PassDataBetweenScreens("5", "5"));
                                   },
                                 ),
-
+                                SizedBox(width: SizeConfig.width(5)),
+                                InkWell(
+                                  child: CustomTextOnlyWidget(
+                                    size: size,
+                                    language: "Português",
+                                    text: Messages.portugalData[1],
+                                    color: Colors.brown,
+                                  ),
+                                  onTap: () {
+                                    debugPrint("Portugal Message Clicked");
+                                    ProjectManager.instance.clickOnButton(
+                                        ProjectRoutes.messagesList.toString(),
+                                        PassDataBetweenScreens("6", "6"));
+                                  },
+                                ),
                               ],
                             ),
                           ),
@@ -578,7 +283,7 @@ class _HomePageState extends State<HomePage> {
                   ),
 
                   // Wishes end
-                  Divider(),
+                  const Divider(),
 
                   // Shayari start
                   DesignerContainer(
@@ -588,27 +293,27 @@ class _HomePageState extends State<HomePage> {
                         Padding(
                           padding: EdgeInsets.all(SizeConfig.width(8)),
                           child: Text("Christmas Shayari",
-                              style: Theme.of(context).textTheme.headline1),
+                              style: Theme.of(context).textTheme.headlineSmall),
                         ),
-
-                         Padding(
+                        Padding(
                           padding: EdgeInsets.all(SizeConfig.width(8)),
                           child: InkWell(
                             child: Container(
                               width: size.width - SizeConfig.width(16),
                               height: size.width / 2,
                               decoration: BoxDecoration(
-                                color: MediaQuery.of(context).platformBrightness ==
-                          Brightness.dark
-                      ? Theme.of(context).primaryColorDark
-                      :Colors.white,
+                                color:
+                                    MediaQuery.of(context).platformBrightness ==
+                                            Brightness.dark
+                                        ? Theme.of(context).primaryColorDark
+                                        : Colors.white,
                                 borderRadius: BorderRadius.only(
                                   bottomLeft:
                                       Radius.circular(SizeConfig.height(20)),
                                   topRight:
                                       Radius.circular(SizeConfig.height(20)),
                                 ),
-                                boxShadow: [
+                                boxShadow: const [
                                   BoxShadow(
                                       offset: Offset(0, 0),
                                       blurRadius: 4,
@@ -629,10 +334,10 @@ class _HomePageState extends State<HomePage> {
                                         padding:
                                             EdgeInsets.all(SizeConfig.width(8)),
                                         child: Text(
-                                          Shayari.shayari_data[1],
+                                          Shayari.shayariData[1],
                                           style: Theme.of(context)
                                               .textTheme
-                                              .bodyText1,
+                                              .bodyMedium,
                                           textAlign: TextAlign.center,
                                         ),
                                       ),
@@ -646,8 +351,13 @@ class _HomePageState extends State<HomePage> {
                                       child: Padding(
                                         padding:
                                             EdgeInsets.all(SizeConfig.width(8)),
-                                        child: Text("Tap Here to Continue",
-                                        style: Theme.of(context).textTheme.bodyText1.copyWith(color: Colors.red),),
+                                        child: Text(
+                                          "Tap Here to Continue",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!
+                                              .copyWith(color: Colors.red),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -655,29 +365,18 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             onTap: () {
-                              print("Shayari Clicked");
-                              interstitialTag = "shayari";
-                              facebookAppEvents.logEvent(
-                                name: "Shayari List",
-                                parameters: {
-                                  'button_id': 'Shayari_button',
-                                },
-                              );
-                              _isInterstitialAdReady == true
-                                  ? _interstitialAd?.show()
-                                  : Navigator.of(context).push(
-                                      new MaterialPageRoute(
-                                          builder: (BuildContext context) =>
-                                              ShayariList()));
+                              debugPrint("Shayari Clicked");
+                              ProjectManager.instance.clickOnButton(
+                                  ProjectRoutes.shayariList.toString());
                             },
                           ),
                         ),
-                       ],
+                      ],
                     ),
                   ),
                   // Shayari end
 
-                  Divider(),
+                  const Divider(),
 
                   // Quotes Start
                   DesignerContainer(
@@ -687,7 +386,7 @@ class _HomePageState extends State<HomePage> {
                         Padding(
                           padding: EdgeInsets.all(SizeConfig.width(8)),
                           child: Text("Christmas Quotes",
-                              style: Theme.of(context).textTheme.headline1),
+                              style: Theme.of(context).textTheme.headlineSmall),
                         ),
                         Padding(
                           padding: EdgeInsets.all(SizeConfig.width(8)),
@@ -696,17 +395,18 @@ class _HomePageState extends State<HomePage> {
                               width: size.width - SizeConfig.width(16),
                               height: size.width / 2,
                               decoration: BoxDecoration(
-                                color: MediaQuery.of(context).platformBrightness ==
-                          Brightness.dark
-                      ? Theme.of(context).primaryColorDark
-                      :Colors.yellow,
+                                color:
+                                    MediaQuery.of(context).platformBrightness ==
+                                            Brightness.dark
+                                        ? Theme.of(context).primaryColorDark
+                                        : Colors.yellow,
                                 borderRadius: BorderRadius.only(
                                   bottomLeft:
                                       Radius.circular(SizeConfig.height(20)),
                                   topRight:
                                       Radius.circular(SizeConfig.height(20)),
                                 ),
-                                boxShadow: [
+                                boxShadow: const [
                                   BoxShadow(
                                       offset: Offset(0, 0),
                                       blurRadius: 4,
@@ -727,10 +427,10 @@ class _HomePageState extends State<HomePage> {
                                         padding:
                                             EdgeInsets.all(SizeConfig.width(8)),
                                         child: Text(
-                                          Quotes.quotes_data[3],
+                                          Quotes.quotesData[3],
                                           style: Theme.of(context)
                                               .textTheme
-                                              .bodyText1,
+                                              .bodyMedium,
                                           textAlign: TextAlign.center,
                                         ),
                                       ),
@@ -744,8 +444,13 @@ class _HomePageState extends State<HomePage> {
                                       child: Padding(
                                         padding:
                                             EdgeInsets.all(SizeConfig.width(8)),
-                                        child: Text("Tap Here to Continue",
-                                        style: Theme.of(context).textTheme.bodyText1.copyWith(color: Colors.red),),
+                                        child: Text(
+                                          "Tap Here to Continue",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!
+                                              .copyWith(color: Colors.red),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -753,20 +458,9 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             onTap: () {
-                              print("Quotes Clicked");
-                              interstitialTag = "quotes";
-                              facebookAppEvents.logEvent(
-                                name: "Quotes List",
-                                parameters: {
-                                  'button_id': 'Quotes_button',
-                                },
-                              );
-                              _isInterstitialAdReady == true
-                                  ? _interstitialAd?.show()
-                                  : Navigator.of(context).push(
-                                      new MaterialPageRoute(
-                                          builder: (BuildContext context) =>
-                                              QuotesList()));
+                              debugPrint("Quotes Clicked");
+                              ProjectManager.instance.clickOnButton(
+                                  ProjectRoutes.quotesList.toString());
                             },
                           ),
                         ),
@@ -775,30 +469,18 @@ class _HomePageState extends State<HomePage> {
                   ),
                   // Quotes End
 
-                  Divider(),
-                  //Native Ad
-                  DesignerContainer(
-                    isLeft: false,
-                    child: NativeAdContainer(
-                        height: _height,
-                        adUnitID: _adUnitID,
-                        nativeAdController: _nativeAdController,
-                        numberAds: 4,
-                        ),
-                  ),
-
-                  Divider(),
+                  const Divider(),
 
                   //Gifs Start
 
                   DesignerContainer(
-                    isLeft: true,
+                    isLeft: false,
                     child: Column(
                       children: [
                         Padding(
                           padding: EdgeInsets.all(SizeConfig.width(8)),
                           child: Text("Christmas Gifs",
-                              style: Theme.of(context).textTheme.headline1),
+                              style: Theme.of(context).textTheme.headlineSmall),
                         ),
                         Padding(
                           padding: EdgeInsets.all(SizeConfig.width(8)),
@@ -811,42 +493,26 @@ class _HomePageState extends State<HomePage> {
                                 children: <Widget>[
                                   CustomFeatureCard(
                                       size: size,
-                                      imageUrl:
-                                          Gifs.gifs_path[2],
+                                      imageUrl: Gifs.gifsPath[2],
                                       ontap: null),
                                   CustomFeatureCard(
                                       size: size,
-                                      imageUrl:
-                                          
-                                          Gifs.gifs_path[3],
+                                      imageUrl: Gifs.gifsPath[3],
                                       ontap: null),
                                   CustomFeatureCard(
                                       size: size,
-                                      imageUrl:
-                                          Gifs.gifs_path[5],
+                                      imageUrl: Gifs.gifsPath[5],
                                       ontap: null),
                                   CustomFeatureCard(
                                       size: size,
-                                      imageUrl:
-                                      Gifs.gifs_path[4],
+                                      imageUrl: Gifs.gifsPath[4],
                                       ontap: null),
                                 ],
                               ),
                               onTap: () {
-                                print("Gifs Clicked");
-                                interstitialTag = "gif";
-                                facebookAppEvents.logEvent(
-                                  name: "GIF List",
-                                  parameters: {
-                                    'button_id': 'gif_button',
-                                  },
-                                );
-                                _isInterstitialAdReady == true
-                                    ? _interstitialAd?.show()
-                                    : Navigator.of(context).push(
-                                        new MaterialPageRoute(
-                                            builder: (BuildContext context) =>
-                                                GifsImages()));
+                                debugPrint("Gifs Clicked");
+                                ProjectManager.instance.clickOnButton(
+                                    ProjectRoutes.gifsList.toString());
                               },
                             ),
                           ),
@@ -856,18 +522,18 @@ class _HomePageState extends State<HomePage> {
                   ),
                   // Gifs End
 
-                  Divider(),
+                  const Divider(),
 
                   //Image Start
 
                   DesignerContainer(
-                    isLeft: false,
+                    isLeft: true,
                     child: Column(
                       children: [
                         Padding(
                           padding: EdgeInsets.all(SizeConfig.width(8)),
                           child: Text("Christmas Wishes Images",
-                              style: Theme.of(context).textTheme.headline1),
+                              style: Theme.of(context).textTheme.headlineSmall),
                         ),
                         Padding(
                           padding: EdgeInsets.all(SizeConfig.width(8)),
@@ -880,42 +546,26 @@ class _HomePageState extends State<HomePage> {
                                 children: <Widget>[
                                   CustomFeatureCard(
                                       size: size,
-                                      imageUrl:
-                                          Images.images_path[7],
+                                      imageUrl: Images.imagesPath[7],
                                       ontap: null),
                                   CustomFeatureCard(
                                       size: size,
-                                      imageUrl:
-                                          Images.images_path[6],
+                                      imageUrl: Images.imagesPath[6],
                                       ontap: null),
                                   CustomFeatureCard(
                                       size: size,
-                                      imageUrl:
-                                          Images.images_path[13],
+                                      imageUrl: Images.imagesPath[13],
                                       ontap: null),
                                   CustomFeatureCard(
                                       size: size,
-                                      imageUrl:
-                                          Images.images_path[12],
+                                      imageUrl: Images.imagesPath[12],
                                       ontap: null),
                                 ],
                               ),
                               onTap: () {
-                                print("Images Clicked");
-                                interstitialTag = "image";
-                                facebookAppEvents.logEvent(
-                                  name: "Image List",
-                                  parameters: {
-                                    'button_id': 'Image_button',
-                                  },
-                                );
-
-                                _isInterstitialAdReady == true
-                                    ? _interstitialAd?.show()
-                                    : Navigator.of(context).push(
-                                        new MaterialPageRoute(
-                                            builder: (BuildContext context) =>
-                                                ImagesList()));
+                                debugPrint("Images Clicked");
+                                ProjectManager.instance.clickOnButton(
+                                    ProjectRoutes.imagesList.toString());
                               },
                             ),
                           ),
@@ -925,19 +575,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   // Image End
 
-                  Divider(),
-                  //Native Ad
-                  DesignerContainer(
-                    isLeft: true,
-                    child: NativeAdContainer(
-                        height: _height,
-                        adUnitID: _adUnitID,
-                        nativeAdController: _nativeAdController,
-                        numberAds: 4,
-                        ),
-                  ),
-
-                  Divider(),
+                  const Divider(),
 
                   // Wish Creator Start
                   DesignerContainer(
@@ -947,45 +585,34 @@ class _HomePageState extends State<HomePage> {
                         Padding(
                           padding: EdgeInsets.all(SizeConfig.width(8)),
                           child: Text("Generate Christmas Cards",
-                              style: Theme.of(context).textTheme.headline1),
+                              style: Theme.of(context).textTheme.headlineSmall),
                         ),
-                        Padding(
-                          padding: EdgeInsets.all(SizeConfig.width(8)),
-                          child: CustomBannerWidget(
-                            size: MediaQuery.of(context).size,
-                            imagePath:
-                                Gifs.gifs_path[43],
-                            buttonText: "Generate Greeting",
-                            topText: "Send Christmas",
-                            middleText: "Wishes & E-Cards",
-                            bottomText: "Share it With Your Loved Ones",
-                            ontap: () {
-                              print("Meme Clicked");
-                              interstitialTag = "meme";
-                              facebookAppEvents.logEvent(
-                                name: "Meme Generator",
-                                parameters: {
-                                  'button_id': 'meme_button',
-                                },
-                              );
-                              _isInterstitialAdReady == true
-                                  ? _interstitialAd?.show()
-                                  : Navigator.of(context).push(
-                                      new MaterialPageRoute(
-                                          builder: (BuildContext context) =>
-                                              MemeGenerator()));
-                            },
+                        InkWell(
+                          child: Padding(
+                            padding: EdgeInsets.all(SizeConfig.width(8)),
+                            child: CustomBannerWidget(
+                              size: MediaQuery.of(context).size,
+                              imagePath: Gifs.gifsPath[43],
+                              buttonText: "Generate Greeting",
+                              topText: "Send Christmas",
+                              middleText: "Wishes & E-Cards",
+                              bottomText: "Share it With Your Loved Ones",
+                            ),
                           ),
+                          onTap: () {
+                            debugPrint("Meme Clicked");
+                            ProjectManager.instance.clickOnButton(
+                                ProjectRoutes.memeGenerator.toString());
+                          },
                         ),
                       ],
                     ),
                   ),
                   // Wish Creator End
 
-                  Divider(),
+                  const Divider(),
 
                   // Status Start
-
                   DesignerContainer(
                     isLeft: true,
                     child: Column(
@@ -993,7 +620,7 @@ class _HomePageState extends State<HomePage> {
                         Padding(
                           padding: EdgeInsets.all(SizeConfig.width(8)),
                           child: Text("Christmas Status Wishes",
-                              style: Theme.of(context).textTheme.headline1),
+                              style: Theme.of(context).textTheme.headlineSmall),
                         ),
                         Padding(
                           padding: EdgeInsets.all(SizeConfig.width(8)),
@@ -1006,261 +633,181 @@ class _HomePageState extends State<HomePage> {
                                 children: <Widget>[
                                   CustomFBTextWidget(
                                     size: size,
-                                    text:
-                                        Status.status_data[2],
+                                    text: Status.statusData[2],
                                     color: Colors.orange[900],
-                                    url:
-                                        Images.images_path[1],
+                                    url: Images.imagesPath[1],
                                     isLeft: false,
-                                    ontap: null,
                                   ),
                                   SizedBox(width: SizeConfig.width(8)),
                                   CustomFBTextWidget(
                                     size: size,
-                                    text:
-                                        Status.status_data[3],
+                                    text: Status.statusData[3],
                                     color: Colors.blue,
-                                    url:
-                                        Images.images_path[1],
+                                    url: Images.imagesPath[1],
                                     isLeft: false,
-                                    ontap: null,
                                   ),
                                   SizedBox(width: SizeConfig.width(8)),
                                   CustomFBTextWidget(
                                     size: size,
-                                    text:
-                                        Status.status_data[4],
+                                    text: Status.statusData[4],
                                     color: Colors.indigoAccent,
-                                    url:
-                                        Images.images_path[1],
+                                    url: Images.imagesPath[1],
                                     isLeft: false,
-                                    ontap: null,
                                   ),
                                   SizedBox(width: SizeConfig.width(8)),
                                   CustomFBTextWidget(
                                     size: size,
-                                    text:
-                                        Status.status_data[1],
+                                    text: Status.statusData[1],
                                     color: Colors.purple,
-                                    url:
-                                       Images.images_path[1],
+                                    url: Images.imagesPath[1],
                                     isLeft: false,
-                                    ontap: null,
                                   ),
                                 ],
                               ),
                               onTap: () {
-                    print("Status Clicked");
-                    interstitialTag = "status";
-                    facebookAppEvents.logEvent(
-                      name: "Status List",
-                      parameters: {
-                        'button_id': 'Status_button',
-                      },
-                    );
-                    _isInterstitialAdReady == true
-                        ? _interstitialAd?.show()
-                        : Navigator.of(context).push(new MaterialPageRoute(
-                            builder: (BuildContext context) => StatusList()));
-                  },
+                                debugPrint("Status Clicked");
+                                ProjectManager.instance.clickOnButton(
+                                    ProjectRoutes.statusList.toString());
+                              },
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-
                   //Status End
-
-
-                  Divider(),
-                  //Native Ad
-                  DesignerContainer(
-                    isLeft: false,
-                    child: NativeAdContainer(
-                        height: _height,
-                        adUnitID: _adUnitID,
-                        nativeAdController: _nativeAdController,
-                        numberAds: 4,
-                        
-                        ),
-                  ),
-
-                  Divider(),
+                  const Divider(),
 
                   Padding(
-                        padding: EdgeInsets.all(SizeConfig.width(8)),
-                        child: Text("Play Game \"Sell Rakhi\"",
-                            style: Theme.of(context).textTheme.headline1),
-                      ),
+                    padding: EdgeInsets.all(SizeConfig.width(8)),
+                    child: Text("Apps From Developer",
+                        style: Theme.of(context).textTheme.headlineSmall),
+                  ),
 
-                      CustomFullCard(
-                        size: MediaQuery.of(context).size,
-                        imageUrl: "lib/assets/rakhi_game.jpeg",
-                        ontap: () {
-                          if (Platform.isAndroid) {
-                            // Android-specific code
-                            print("More Button Clicked");
-                            launch(
-                                "https://play.google.com/store/apps/developer?id=Festival+Messages+SMS");
-                          } else if (Platform.isIOS) {
-                            // iOS-specific code
-                            print("More Button Clicked");
-                            launch(
-                                "https://apps.apple.com/us/app/-/id1434054710");
-
-                            facebookAppEvents.logEvent(
-                              name: "Play Rakshabandhan Game",
-                              parameters: {
-                                'clicked_on_play_rakshabandhan_game': 'Yes',
-                              },
-                            );
-                          }
-                        },
-                      ),
-
-                      Divider(),
-
-                      Padding(
-                        padding: EdgeInsets.all(SizeConfig.width(8)),
-                        child: Text("Apps From Developer",
-                            style: Theme.of(context).textTheme.headline1),
-                      ),
-
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Padding(
-                          padding: EdgeInsets.all(SizeConfig.width(8)),
-                          child: Row(
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Padding(
+                      padding: EdgeInsets.all(SizeConfig.width(8)),
+                      child: Row(
+                        children: <Widget>[
+                          //Column1
+                          const Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              //Column1
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  AppStoreAppsItemWidget1(
-                                      imageUrl:
-                                          "https://is1-ssl.mzstatic.com/image/thumb/Purple117/v4/8f/e7/b5/8fe7b5bc-03eb-808c-2b9e-fc2c12112a45/mzl.jivuavtz.png/292x0w.jpg",
-                                      appTitle:
-                                          "Good Morning Images & Messages",
-                                      appUrl:
-                                          "https://apps.apple.com/us/app/good-morning-images-messages-to-wish-greet-gm/id1232993917"),
-                                  Divider(),
-                                  AppStoreAppsItemWidget1(
-                                      imageUrl:
-                                          "https://is4-ssl.mzstatic.com/image/thumb/Purple114/v4/44/e0/fd/44e0fdb5-667b-5468-7b2f-53638cba539e/AppIcon-1x_U007emarketing-0-7-0-0-85-220.png/292x0w.jpg",
-                                      appTitle: "Birthday Status Wishes Quotes",
-                                      appUrl:
-                                          "https://apps.apple.com/us/app/birthday-status-wishes-quotes/id1522542709"),
-                                  Divider(),
-                                  AppStoreAppsItemWidget1(
-                                      imageUrl:
-                                          "https://is4-ssl.mzstatic.com/image/thumb/Purple114/v4/1a/58/a4/1a58a480-a0ae-1940-2cf3-38524430f66b/AppIcon-0-1x_U007emarketing-0-0-GLES2_U002c0-512MB-sRGB-0-0-0-85-220-0-0-0-7.png/292x0w.jpg",
-                                      appTitle: "Astrology Horoscope Lal Kitab",
-                                      appUrl:
-                                          "https://apps.apple.com/us/app/astrology-horoscope-lal-kitab/id1448343526"),
-                                ],
-                              ),
-                              SizedBox(width: SizeConfig.width(3)),
-                              //Column2
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  AppStoreAppsItemWidget1(
-                                      imageUrl:
-                                          "https://is2-ssl.mzstatic.com/image/thumb/Purple124/v4/e9/96/64/e99664d3-1083-5fac-6a0c-61718ee209fd/AppIcon-0-1x_U007emarketing-0-0-GLES2_U002c0-512MB-sRGB-0-0-0-85-220-0-0-0-7.png/292x0w.jpg",
-                                      appTitle:
-                                          "Weight Loss My Diet Coach Tips",
-                                      appUrl:
-                                          "https://apps.apple.com/us/app/weight-loss-my-diet-coach-tips/id1448343218"),
-                                  Divider(),
-                                  AppStoreAppsItemWidget1(
-                                      imageUrl:
-                                          "https://is2-ssl.mzstatic.com/image/thumb/Purple127/v4/5f/7c/45/5f7c45c7-fb75-ea39-feaa-a698b0e4b09e/pr_source.jpg/292x0w.jpg",
-                                      appTitle:
-                                          "English Speaking Course Grammar",
-                                      appUrl:
-                                          "https://apps.apple.com/us/app/english-speaking-course-learn-grammar-vocabulary/id1233093288"),
-                                  Divider(),
-                                  AppStoreAppsItemWidget1(
-                                      imageUrl:
-                                          "https://is4-ssl.mzstatic.com/image/thumb/Purple128/v4/50/ad/82/50ad82d9-0d82-5007-fcdd-cc47c439bfd0/AppIcon-0-1x_U007emarketing-0-85-220-10.png/292x0w.jpg",
-                                      appTitle:
-                                          "English Hindi Language Diction",
-                                      appUrl:
-                                          "https://apps.apple.com/us/app/english-hindi-language-diction/id1441243874"),
-                                ],
-                              ),
-                              SizedBox(width: SizeConfig.width(3)),
-                              //Column3
-
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  AppStoreAppsItemWidget1(
-                                      imageUrl:
-                                          "https://is3-ssl.mzstatic.com/image/thumb/Purple118/v4/17/f5/0c/17f50c4d-431b-72c6-b9f4-d1706da59394/AppIcon-0-1x_U007emarketing-0-0-85-220-7.png/292x0w.jpg",
-                                      appTitle: "Celebrate Happy New Year 2019",
-                                      appUrl:
-                                          "https://apps.apple.com/us/app/celebrate-happy-new-year-2019/id1447735210"),
-                                  Divider(),
-                                  AppStoreAppsItemWidget1(
-                                      imageUrl:
-                                          "https://is1-ssl.mzstatic.com/image/thumb/Purple118/v4/79/1e/61/791e61de-500c-6c97-3947-8abbc6b887e3/AppIcon-0-1x_U007emarketing-0-0-GLES2_U002c0-512MB-sRGB-0-0-0-85-220-0-0-0-7.png/292x0w.jpg",
-                                      appTitle:
-                                          "Bangladesh Passport Visa Biman",
-                                      appUrl:
-                                          "https://apps.apple.com/us/app/bangladesh-passport-visa-biman/id1443074171"),
-                                  Divider(),
-                                  AppStoreAppsItemWidget1(
-                                      imageUrl:
-                                          "https://is1-ssl.mzstatic.com/image/thumb/Purple126/v4/dd/34/c3/dd34c3e8-5c9f-51aa-a3eb-3a203f5fd49b/AppIcon-0-1x_U007emarketing-0-0-GLES2_U002c0-512MB-sRGB-0-0-0-85-220-0-0-0-10.png/292x0w.jpg",
-                                      appTitle:
-                                          "Complete Spoken English Course",
-                                      appUrl:
-                                          "https://apps.apple.com/us/app/complete-spoken-english-course/id1440118617"),
-                                ],
-                              ),
-                              SizedBox(width: SizeConfig.width(3)),
-
-                              //Column4
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  AppStoreAppsItemWidget1(
-                                      imageUrl:
-                                          "https://is4-ssl.mzstatic.com/image/thumb/Purple128/v4/bd/00/ee/bd00ee3b-43af-6b07-62a6-28c68373a8b5/AppIcon-1x_U007emarketing-85-220-0-9.png/292x0w.jpg",
-                                      appTitle:
-                                          "Happy Thanksgiving Day Greeting SMS",
-                                      appUrl:
-                                          "https://apps.apple.com/us/app/happy-merry_christmas-greeting-sms/id1435157874"),
-                                  Divider(),
-                                  AppStoreAppsItemWidget1(
-                                      imageUrl:
-                                          "https://is4-ssl.mzstatic.com/image/thumb/Purple91/v4/f0/84/d7/f084d764-79a8-f6d1-3778-1cb27fabb8bd/pr_source.png/292x0w.jpg",
-                                      appTitle: "Egg Recipes 100+ Recipes",
-                                      appUrl:
-                                          "https://apps.apple.com/us/app/egg-recipes-100-recipes-collection-for-eggetarian/id1232736881"),
-                                  Divider(),
-                                  AppStoreAppsItemWidget1(
-                                      imageUrl:
-                                          "https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/0f/d6/f4/0fd6f410-9664-94a5-123f-38d787bf28c6/AppIcon-1x_U007emarketing-0-7-0-0-85-220.png/292x0w.jpg",
-                                      appTitle:
-                                          "Rakshabandhan Images Greetings",
-                                      appUrl:
-                                          "https://apps.apple.com/us/app/rakshabandhan-images-greetings/id1523619788"),
-                                ],
-                              ),
+                              AppStoreAppsItemWidget1(
+                                  imageUrl:
+                                      "https://is1-ssl.mzstatic.com/image/thumb/Purple117/v4/8f/e7/b5/8fe7b5bc-03eb-808c-2b9e-fc2c12112a45/mzl.jivuavtz.png/292x0w.jpg",
+                                  appTitle: "Good Morning Images & Messages",
+                                  appUrl:
+                                      "https://apps.apple.com/us/app/good-morning-images-messages-to-wish-greet-gm/id1232993917"),
+                              Divider(),
+                              AppStoreAppsItemWidget1(
+                                  imageUrl:
+                                      "https://is4-ssl.mzstatic.com/image/thumb/Purple114/v4/44/e0/fd/44e0fdb5-667b-5468-7b2f-53638cba539e/AppIcon-1x_U007emarketing-0-7-0-0-85-220.png/292x0w.jpg",
+                                  appTitle: "Birthday Status Wishes Quotes",
+                                  appUrl:
+                                      "https://apps.apple.com/us/app/birthday-status-wishes-quotes/id1522542709"),
+                              Divider(),
+                              AppStoreAppsItemWidget1(
+                                  imageUrl:
+                                      "https://is4-ssl.mzstatic.com/image/thumb/Purple114/v4/1a/58/a4/1a58a480-a0ae-1940-2cf3-38524430f66b/AppIcon-0-1x_U007emarketing-0-0-GLES2_U002c0-512MB-sRGB-0-0-0-85-220-0-0-0-7.png/292x0w.jpg",
+                                  appTitle: "Astrology Horoscope Lal Kitab",
+                                  appUrl:
+                                      "https://apps.apple.com/us/app/astrology-horoscope-lal-kitab/id1448343526"),
                             ],
                           ),
-                        ),
-                      ),
-                    
+                          SizedBox(width: SizeConfig.width(3)),
+                          //Column2
+                          const Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              AppStoreAppsItemWidget1(
+                                  imageUrl:
+                                      "https://is2-ssl.mzstatic.com/image/thumb/Purple124/v4/e9/96/64/e99664d3-1083-5fac-6a0c-61718ee209fd/AppIcon-0-1x_U007emarketing-0-0-GLES2_U002c0-512MB-sRGB-0-0-0-85-220-0-0-0-7.png/292x0w.jpg",
+                                  appTitle: "Weight Loss My Diet Coach Tips",
+                                  appUrl:
+                                      "https://apps.apple.com/us/app/weight-loss-my-diet-coach-tips/id1448343218"),
+                              Divider(),
+                              AppStoreAppsItemWidget1(
+                                  imageUrl:
+                                      "https://is2-ssl.mzstatic.com/image/thumb/Purple127/v4/5f/7c/45/5f7c45c7-fb75-ea39-feaa-a698b0e4b09e/pr_source.jpg/292x0w.jpg",
+                                  appTitle: "English Speaking Course Grammar",
+                                  appUrl:
+                                      "https://apps.apple.com/us/app/english-speaking-course-learn-grammar-vocabulary/id1233093288"),
+                              Divider(),
+                              AppStoreAppsItemWidget1(
+                                  imageUrl:
+                                      "https://is4-ssl.mzstatic.com/image/thumb/Purple128/v4/50/ad/82/50ad82d9-0d82-5007-fcdd-cc47c439bfd0/AppIcon-0-1x_U007emarketing-0-85-220-10.png/292x0w.jpg",
+                                  appTitle: "English Hindi Language Diction",
+                                  appUrl:
+                                      "https://apps.apple.com/us/app/english-hindi-language-diction/id1441243874"),
+                            ],
+                          ),
+                          SizedBox(width: SizeConfig.width(3)),
+                          //Column3
 
-                  
+                          const Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              AppStoreAppsItemWidget1(
+                                  imageUrl:
+                                      "https://is3-ssl.mzstatic.com/image/thumb/Purple118/v4/17/f5/0c/17f50c4d-431b-72c6-b9f4-d1706da59394/AppIcon-0-1x_U007emarketing-0-0-85-220-7.png/292x0w.jpg",
+                                  appTitle: "Celebrate Happy New Year 2019",
+                                  appUrl:
+                                      "https://apps.apple.com/us/app/celebrate-happy-new-year-2019/id1447735210"),
+                              Divider(),
+                              AppStoreAppsItemWidget1(
+                                  imageUrl:
+                                      "https://is1-ssl.mzstatic.com/image/thumb/Purple118/v4/79/1e/61/791e61de-500c-6c97-3947-8abbc6b887e3/AppIcon-0-1x_U007emarketing-0-0-GLES2_U002c0-512MB-sRGB-0-0-0-85-220-0-0-0-7.png/292x0w.jpg",
+                                  appTitle: "Bangladesh Passport Visa Biman",
+                                  appUrl:
+                                      "https://apps.apple.com/us/app/bangladesh-passport-visa-biman/id1443074171"),
+                              Divider(),
+                              AppStoreAppsItemWidget1(
+                                  imageUrl:
+                                      "https://is1-ssl.mzstatic.com/image/thumb/Purple126/v4/dd/34/c3/dd34c3e8-5c9f-51aa-a3eb-3a203f5fd49b/AppIcon-0-1x_U007emarketing-0-0-GLES2_U002c0-512MB-sRGB-0-0-0-85-220-0-0-0-10.png/292x0w.jpg",
+                                  appTitle: "Complete Spoken English Course",
+                                  appUrl:
+                                      "https://apps.apple.com/us/app/complete-spoken-english-course/id1440118617"),
+                            ],
+                          ),
+                          SizedBox(width: SizeConfig.width(3)),
+
+                          //Column4
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              AppStoreAppsItemWidget1(
+                                  imageUrl:
+                                      "https://is4-ssl.mzstatic.com/image/thumb/Purple128/v4/bd/00/ee/bd00ee3b-43af-6b07-62a6-28c68373a8b5/AppIcon-1x_U007emarketing-85-220-0-9.png/292x0w.jpg",
+                                  appTitle:
+                                      "Happy Thanksgiving Day Greeting SMS",
+                                  appUrl:
+                                      "https://apps.apple.com/us/app/happy-merry_christmas-greeting-sms/id1435157874"),
+                              Divider(),
+                              AppStoreAppsItemWidget1(
+                                  imageUrl:
+                                      "https://is4-ssl.mzstatic.com/image/thumb/Purple91/v4/f0/84/d7/f084d764-79a8-f6d1-3778-1cb27fabb8bd/pr_source.png/292x0w.jpg",
+                                  appTitle: "Egg Recipes 100+ Recipes",
+                                  appUrl:
+                                      "https://apps.apple.com/us/app/egg-recipes-100-recipes-collection-for-eggetarian/id1232736881"),
+                              Divider(),
+                              AppStoreAppsItemWidget1(
+                                  imageUrl:
+                                      "https://is1-ssl.mzstatic.com/image/thumb/Purple114/v4/0f/d6/f4/0fd6f410-9664-94a5-123f-38d787bf28c6/AppIcon-1x_U007emarketing-0-7-0-0-85-220.png/292x0w.jpg",
+                                  appTitle: "Rakshabandhan Images Greetings",
+                                  appUrl:
+                                      "https://apps.apple.com/us/app/rakshabandhan-images-greetings/id1523619788"),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1270,163 +817,25 @@ class _HomePageState extends State<HomePage> {
       drawer: MyDrawer(),
     );
   }
-}
-
-class DesignerContainer extends StatelessWidget {
-  const DesignerContainer({
-    Key key,
-    @required this.child,
-    @required this.isLeft,
-  }) : super(key: key);
-
-  final Widget child;
-  final bool isLeft;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: isLeft
-          ? BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryVariant,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(SizeConfig.height(20)),
-              ),
-              boxShadow: [
-                BoxShadow(
-                    offset: Offset(0, 0), blurRadius: 4, color: Colors.grey),
-              ],
-            )
-          : BoxDecoration(
-              color: Colors.green[800],
-            
-              borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(SizeConfig.height(20)),
-              ),
-              boxShadow: [
-                BoxShadow(
-                    offset: Offset(0, 0), blurRadius: 4, color: Colors.grey),
-              ],
-            ),
-      child: child,
-    );
+  void moveToScreen(String s, [PassDataBetweenScreens? object]) {
+    // TODO: implement moveToScreen
+    debugPrint("Home Page: Move to Screen $s");
+    Navigator.of(context).pushNamed(s, arguments: object);
   }
-}
-
-
-class CustomHeader1 extends StatelessWidget {
-  const CustomHeader1({
-    Key key,
-    this.headerText,
-    this.imagePath,
-    this.descriptionText,
-  }) : super(key: key);
-
-  final String headerText, imagePath, descriptionText;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(
-        top: 3 * SizeConfig.widthMultiplier,
-        bottom: 10 * SizeConfig.widthMultiplier,
-        left: 10 * SizeConfig.widthMultiplier,
-        right: 10 * SizeConfig.widthMultiplier,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryVariant,
-        borderRadius: BorderRadius.only(
-          //30
-          bottomRight: Radius.circular(MediaQuery.of(context).size.width),
-        ),
-      ),
-      child: Column(
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    headerText,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyText1
-                        .copyWith(color: Colors.white),
-                  ),
-                  SizedBox(
-                    width: 1.93 * SizeConfig.widthMultiplier,
-                  ),
-                  CircleAvatar(
-                    backgroundImage: NetworkImage(imagePath),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 2 * SizeConfig.heightMultiplier,
-          ),
-          Text(
-            descriptionText,
-            textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .subtitle1
-                .copyWith(color: Colors.white),
-          ),
-        ],
-      ),
-    );
+  void moveToScreenAfterAd(String s, [PassDataBetweenScreens? object]) {
+    // TODO: implement moveToScreenAfterAd
+    debugPrint("Home Page: Move to Screen After Ad $s");
+    Navigator.of(context).pushNamed(s, arguments: object);
   }
-}
-
-class AppStoreAppsItemWidget1 extends StatelessWidget {
-  const AppStoreAppsItemWidget1({
-    Key key,
-    this.imageUrl,
-    this.appUrl,
-    this.appTitle,
-  }) : super(key: key);
-
-  final String imageUrl, appUrl, appTitle;
 
   @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          ClipRRect(
-            borderRadius:
-                BorderRadius.all(Radius.circular(SizeConfig.width(16))),
-            child: Padding(
-              padding: EdgeInsets.only(right: SizeConfig.width(3)),
-              child: CachedNetworkImage(
-                height: SizeConfig.height(80),
-                width: SizeConfig.width(80),
-                imageUrl: imageUrl,
-                placeholder: (context, url) =>
-                    const CircularProgressIndicator(),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
-                fadeOutDuration: const Duration(seconds: 1),
-                fadeInDuration: const Duration(seconds: 3),
-              ),
-            ),
-          ),
-          Text(
-            appTitle,
-            style: Theme.of(context)
-                .textTheme
-                .bodyText1
-                .copyWith(fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-      onTap: () {
-        launch(appUrl);
-      },
-    );
+  void showAd(String s, [PassDataBetweenScreens? object]) {
+    // TODO: implement showAd
+    debugPrint("Home Page: Showing Ad Now");
+    AdManager.instance.showInterstitialAd(s, object);
   }
 }
-

@@ -24,15 +24,15 @@ class Strings {
   static const iosAdmobRewardedId = "ca-app-pub-8179797674906935/8066670042";
 
 
-  static const androidAdmobAppId = "ca-app-pub-8179797674906935~3897889625";
+  static const androidAdmobAppId = "ca-app-pub-8179797674906935~6168662659";
 
-  static const androidAdmobBannerId = "ca-app-pub-8179797674906935/6332481270";
+  static const androidAdmobBannerId = "ca-app-pub-8179797674906935/9828706063";
   
-  static const androidAdmobInterstitialId = "ca-app-pub-8179797674906935/3706317930";
+  static const androidAdmobInterstitialId = "ca-app-pub-8179797674906935/3625479546";
 
-  static const androidAdmobNativeId = "ca-app-pub-8179797674906935/1080154590";
+  static const androidAdmobNativeId = "ca-app-pub-8179797674906935/7906754686";
 
-  static const androidAdmobRewardedId = "ca-app-pub-8179797674906935/2393236260";
+  static const androidAdmobRewardedId = "ca-app-pub-8179797674906935/5835125113";
 
   static const testDevice = 'a835aea0489176f272e2d174b8d921ca';
 
@@ -52,5 +52,7 @@ class Strings {
   static String shareAppText =
       "Hey I have found this amazing app for you.\nHave a look on\n${Strings.appName}\n${Strings.appUrl}";
 
-
+   static void RateNReview() {
+    //LaunchReview.launch(iOSAppId: Strings.iosAppId);
+  }
 }

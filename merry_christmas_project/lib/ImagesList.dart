@@ -1,9 +1,15 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'AdManager/ad_helper.dart';
+import 'Enums/project_routes_enum.dart';
 import 'data/Images.dart';
+import 'data/Strings.dart';
 import 'utils/SizeConfig.dart';
-import 'ImageDetailPage.dart';
+import 'utils/pass_data_between_screens.dart';
+//import 'ImageDetailPage.dart';
 
 class ImagesList extends StatefulWidget {
   @override
@@ -11,9 +17,41 @@ class ImagesList extends StatefulWidget {
 }
 
 class _ImagesListState extends State<ImagesList> {
-  static final facebookAppEvents = FacebookAppEvents();
 
-  var data = Images.images_path;
+  var data = Images.imagesPath;
+
+  BannerAd? _bannerAd;
+
+  @override
+  void initState() {
+    super.initState();
+    loadBannerAd().load();
+  }
+
+  BannerAd loadBannerAd() {
+    return BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          debugPrint('Failed to load a banner ad: ${err.message}');
+          ad.dispose();
+        },
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _bannerAd!.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,13 +59,13 @@ class _ImagesListState extends State<ImagesList> {
       appBar: AppBar(
         title: Text(
           "Images",
-          style: Theme.of(context).appBarTheme.textTheme.headline1,
+          style: Theme.of(context).appBarTheme.toolbarTextStyle,
         ),
       ),
       body: SafeArea(
         child: data != null
             ? GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2),
                 itemBuilder: (context, index) {
                   return GestureDetector(
@@ -38,7 +76,9 @@ class _ImagesListState extends State<ImagesList> {
                           title: CachedNetworkImage(
                             imageUrl: data[index],
                             placeholder: (context, url) =>
-                                const CircularProgressIndicator(),
+                                const CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
                             errorWidget: (context, url, error) =>
                                 const Icon(Icons.error),
                             fadeOutDuration: const Duration(seconds: 1),
@@ -47,26 +87,31 @@ class _ImagesListState extends State<ImagesList> {
                         ),
                       ),
                       onTap: () {
-                        print("Click on Image Grid item $index");
-                        Navigator.push(
-                            context,
-                            new MaterialPageRoute(
-                                builder: (context) =>
-                                    ImageDetailPage(index)));
+                        debugPrint("Click on Image Grid item $index");
+                        //Navigator.push(context,MaterialPageRoute(builder: (context) => ImageDetailPage(index)));
 
-                        facebookAppEvents.logEvent(
-                          name: "Image List",
-                          parameters: {
-                            'clicked_on_jpeg_image_index': '$index',
-                          },
-                        );
+                        Navigator.of(context).pushNamed(
+                          ProjectRoutes.imagesDetailPage.toString(),
+                          arguments:
+                              PassDataBetweenScreens("", index.toString()));
                       });
                 },
                 itemCount: data.length,
               )
-            : Center(
+            : const Center(
                 child: CircularProgressIndicator(),
               ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: _bannerAd != null
+            ? SizedBox(
+                width: _bannerAd!.size.width.toDouble(),
+                height: _bannerAd!.size.height.toDouble(),
+                child: AdWidget(
+                  ad: _bannerAd!,
+                ),
+              )
+            : Container(),
       ),
     );
   }

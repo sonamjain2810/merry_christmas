@@ -1,7 +1,7 @@
 class Status {
   Status._();
 
-  static const status_data = [
+  static const statusData = [
     "The four stages of life, you believe in Santa Claus, you don’t believe in Santa Claus,you become Santa Claus, you look like Santa Claus.",
     "At Christmas play and make good cheer, for Christmas comes but once a year.",
     "I will honor Christmas in my heart, and try to keep it all the year",
